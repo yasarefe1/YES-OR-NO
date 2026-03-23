@@ -3,19 +3,24 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Dices } from 'lucide-react';
 
 export default function App() {
-  const [decision, setDecision] = useState<string | null>(null);
+  const [option1, setOption1] = useState('EVET');
+  const [option2, setOption2] = useState('HAYIR');
+  const [decision, setDecision] = useState<{text: string, type: 'opt1' | 'opt2'} | null>(null);
   const [isDeciding, setIsDeciding] = useState(false);
 
   const makeDecision = () => {
-    if (isDeciding) return;
+    if (isDeciding || !option1.trim() || !option2.trim()) return;
     
     setIsDeciding(true);
     setDecision(null);
     
     // Simulate thinking time for suspense
     setTimeout(() => {
-      const result = Math.random() > 0.5 ? 'EVET' : 'HAYIR';
-      setDecision(result);
+      const isOpt1 = Math.random() > 0.5;
+      setDecision({
+        text: isOpt1 ? option1 : option2,
+        type: isOpt1 ? 'opt1' : 'opt2'
+      });
       setIsDeciding(false);
     }, 1200);
   };
@@ -32,10 +37,36 @@ export default function App() {
         </div>
 
         <h1 className="text-3xl font-bold mb-2 tracking-tight text-zinc-100">Karar Verici</h1>
-        <p className="text-zinc-400 mb-8 text-sm leading-relaxed">
+        <p className="text-zinc-400 mb-6 text-sm leading-relaxed">
           Kararsız mı kaldın? <br/>
-          Sadece butona bas, senin yerine karar verelim.
+          Seçeneklerini yaz ve butona bas.
         </p>
+
+        <div className="flex gap-3 w-full mb-6">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={option1}
+              onChange={(e) => setOption1(e.target.value)}
+              disabled={isDeciding}
+              className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center text-emerald-400 font-semibold focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-50"
+              placeholder="1. Seçenek"
+            />
+          </div>
+          <div className="flex items-center justify-center text-zinc-600 font-medium text-sm">
+            veya
+          </div>
+          <div className="flex-1">
+            <input
+              type="text"
+              value={option2}
+              onChange={(e) => setOption2(e.target.value)}
+              disabled={isDeciding}
+              className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center text-rose-400 font-semibold focus:outline-none focus:border-rose-500/50 transition-colors disabled:opacity-50"
+              placeholder="2. Seçenek"
+            />
+          </div>
+        </div>
 
         <div className="h-48 w-full flex items-center justify-center mb-8 bg-zinc-950/50 rounded-2xl border border-zinc-800/50 overflow-hidden relative shadow-inner">
           <AnimatePresence mode="wait">
@@ -67,13 +98,13 @@ export default function App() {
                   stiffness: 300, 
                   damping: 20 
                 }}
-                className={`text-6xl font-black tracking-tighter ${
-                  decision === 'EVET' 
+                className={`text-4xl sm:text-5xl font-black tracking-tighter px-4 break-words w-full ${
+                  decision.type === 'opt1' 
                     ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]' 
                     : 'text-rose-400 drop-shadow-[0_0_15px_rgba(251,113,133,0.3)]'
                 }`}
               >
-                {decision}
+                {decision.text}
               </motion.div>
             ) : (
               <motion.div
@@ -91,7 +122,7 @@ export default function App() {
 
         <button
           onClick={makeDecision}
-          disabled={isDeciding}
+          disabled={isDeciding || !option1.trim() || !option2.trim()}
           className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20"
         >
           {isDeciding ? 'Karar Veriliyor...' : 'Karar Ver'}
