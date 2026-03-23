@@ -1,12 +1,38 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Dices } from 'lucide-react';
+import { Dices, Sparkles, Palette } from 'lucide-react';
+
+const THEMES = [
+  {
+    id: 'classic',
+    opt1: { text: 'text-emerald-400', borderFocus: 'focus:border-emerald-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]', bg: 'bg-emerald-400' },
+    opt2: { text: 'text-rose-400', borderFocus: 'focus:border-rose-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(251,113,133,0.3)]', bg: 'bg-rose-400' }
+  },
+  {
+    id: 'neon',
+    opt1: { text: 'text-cyan-400', borderFocus: 'focus:border-cyan-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]', bg: 'bg-cyan-400' },
+    opt2: { text: 'text-fuchsia-400', borderFocus: 'focus:border-fuchsia-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(232,121,249,0.3)]', bg: 'bg-fuchsia-400' }
+  },
+  {
+    id: 'sunset',
+    opt1: { text: 'text-amber-400', borderFocus: 'focus:border-amber-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]', bg: 'bg-amber-400' },
+    opt2: { text: 'text-violet-400', borderFocus: 'focus:border-violet-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]', bg: 'bg-violet-400' }
+  },
+  {
+    id: 'fireice',
+    opt1: { text: 'text-orange-400', borderFocus: 'focus:border-orange-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(251,146,60,0.3)]', bg: 'bg-orange-400' },
+    opt2: { text: 'text-sky-400', borderFocus: 'focus:border-sky-500/50', shadow: 'drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]', bg: 'bg-sky-400' }
+  }
+];
 
 export default function App() {
   const [option1, setOption1] = useState('EVET');
   const [option2, setOption2] = useState('HAYIR');
   const [decision, setDecision] = useState<{text: string, type: 'opt1' | 'opt2'} | null>(null);
   const [isDeciding, setIsDeciding] = useState(false);
+  const [themeIndex, setThemeIndex] = useState(0);
+
+  const currentTheme = THEMES[themeIndex];
 
   const makeDecision = () => {
     if (isDeciding || !option1.trim() || !option2.trim()) return;
@@ -42,6 +68,24 @@ export default function App() {
           Seçeneklerini yaz ve butona bas.
         </p>
 
+        {/* Theme Selector */}
+        <div className="flex items-center justify-center gap-3 mb-6 bg-zinc-950/30 py-2 px-4 rounded-full border border-zinc-800/50">
+          <Palette className="w-4 h-4 text-zinc-500" />
+          <div className="flex gap-2">
+            {THEMES.map((theme, idx) => (
+              <button
+                key={theme.id}
+                onClick={() => setThemeIndex(idx)}
+                className={`w-5 h-5 rounded-full flex overflow-hidden border-2 transition-all ${themeIndex === idx ? 'border-zinc-300 scale-125 shadow-lg' : 'border-zinc-700 hover:border-zinc-500 opacity-70 hover:opacity-100'}`}
+                title="Tema Değiştir"
+              >
+                <div className={`w-1/2 h-full ${theme.opt1.bg}`} />
+                <div className={`w-1/2 h-full ${theme.opt2.bg}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex gap-3 w-full mb-6">
           <div className="flex-1">
             <input
@@ -49,7 +93,7 @@ export default function App() {
               value={option1}
               onChange={(e) => setOption1(e.target.value)}
               disabled={isDeciding}
-              className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center text-emerald-400 font-semibold focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-50"
+              className={`w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center font-semibold focus:outline-none transition-colors disabled:opacity-50 ${currentTheme.opt1.text} ${currentTheme.opt1.borderFocus}`}
               placeholder="1. Seçenek"
             />
           </div>
@@ -62,7 +106,7 @@ export default function App() {
               value={option2}
               onChange={(e) => setOption2(e.target.value)}
               disabled={isDeciding}
-              className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center text-rose-400 font-semibold focus:outline-none focus:border-rose-500/50 transition-colors disabled:opacity-50"
+              className={`w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-center font-semibold focus:outline-none transition-colors disabled:opacity-50 ${currentTheme.opt2.text} ${currentTheme.opt2.borderFocus}`}
               placeholder="2. Seçenek"
             />
           </div>
@@ -100,8 +144,8 @@ export default function App() {
                 }}
                 className={`text-4xl sm:text-5xl font-black tracking-tighter px-4 break-words w-full ${
                   decision.type === 'opt1' 
-                    ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]' 
-                    : 'text-rose-400 drop-shadow-[0_0_15px_rgba(251,113,133,0.3)]'
+                    ? `${currentTheme.opt1.text} ${currentTheme.opt1.shadow}` 
+                    : `${currentTheme.opt2.text} ${currentTheme.opt2.shadow}`
                 }`}
               >
                 {decision.text}
@@ -120,13 +164,25 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        <button
+        <motion.button
+          whileHover={isDeciding || !option1.trim() || !option2.trim() ? {} : { scale: 1.02, y: -2 }}
+          whileTap={isDeciding || !option1.trim() || !option2.trim() ? {} : { scale: 0.98 }}
           onClick={makeDecision}
           disabled={isDeciding || !option1.trim() || !option2.trim()}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20"
+          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20 hover:shadow-indigo-500/40"
         >
-          {isDeciding ? 'Karar Veriliyor...' : 'Karar Ver'}
-        </button>
+          {isDeciding ? (
+            <>
+              <Dices className="w-5 h-5 animate-spin" />
+              Karar Veriliyor...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Karar Ver
+            </>
+          )}
+        </motion.button>
         
         <div className="mt-8 pt-6 border-t border-zinc-800/50 w-full flex items-center justify-center gap-2">
           <span className="text-xl">👉</span>
